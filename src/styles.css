@@ -79,7 +79,7 @@ h1,h2,h3{font-family:var(--serif);margin:0;font-weight:700}
 .tbar .badge{background:var(--accent)}
 .view{flex:1;min-height:0;position:relative;display:grid;place-items:center;background:#0e0c0a}
 .view video{width:100%;height:100%;object-fit:contain;display:block;cursor:default}
-.tile.control video{cursor:none}
+.tile.control video{cursor:default}
 .status{position:absolute;inset:0;display:grid;place-items:center;color:#d8ccb9;text-align:center;padding:20px;font-family:var(--serif);font-style:italic;font-size:16px}
 .status .retry{margin-top:10px;font-style:normal}
 

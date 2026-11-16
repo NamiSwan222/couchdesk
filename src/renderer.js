@@ -52,7 +52,7 @@ $('#addForm').addEventListener('submit', () => {
 /* ------------------------------------------------------------------ viewer sessions */
 // Ask the sender's encoder to start high and not collapse resolution (values in kbps).
 function boostBitrate(sdp) {
-  const hint = 'x-google-start-bitrate=20000;x-google-min-bitrate=8000;x-google-max-bitrate=40000';
+  const hint = 'x-google-start-bitrate=6000;x-google-min-bitrate=500;x-google-max-bitrate=20000';
   const lines = sdp.split('\r\n');
   const mi = lines.findIndex((l) => l.startsWith('m=video'));
   if (mi < 0) return sdp;
@@ -243,6 +243,11 @@ async function getScreen() {
   screenStream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: { ideal: 60, max: 60 }, cursor: 'never' }, audio: false });
   return screenStream;
 }
+// Encode at most ~1080p: a 3440x1440 frame takes far more bandwidth than a VPN link can carry without queueing.
+function downscale(track) {
+  const { width = 1920, height = 1080 } = track.getSettings();
+  return Math.max(1, width / 1920, height / 1080);
+}
 function dropScreenIfIdle() {
   if (peers.size === 0 && screenStream) { screenStream.getTracks().forEach((t) => t.stop()); screenStream = null; }
 }
@@ -270,8 +275,8 @@ desk.onSignal(async ({ sid, msg }) => {
         } catch (_) {}
         try {
           const p = sender.getParameters();
-          p.encodings = [{ ...(p.encodings?.[0] || {}), maxBitrate: 30_000_000, maxFramerate: 60, scaleResolutionDownBy: 1, networkPriority: 'high' }];
-          p.degradationPreference = 'balanced';
+          p.encodings = [{ ...(p.encodings?.[0] || {}), maxBitrate: 20_000_000, maxFramerate: 60, scaleResolutionDownBy: downscale(t), networkPriority: 'high' }];
+          p.degradationPreference = 'maintain-framerate';
           await sender.setParameters(p);
         } catch (_) {}
       }
