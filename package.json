@@ -1,8 +1,54 @@
 {
   "name": "couchdesk",
-  "version": "0.1.0",
-  "description": "Remote desktop for your own PCs - several at once, over Radmin VPN or any LAN",
+  "version": "0.2.0",
+  "description": "CouchDesk - remote desktop for your own PCs",
   "main": "src/main.js",
-  "scripts": { "start": "electron ." },
-  "dependencies": { "electron": "^45.3.3", "koffi": "^3.3.8", "ws": "^8.23.0" }
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --publish never"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.11",
+    "koffi": "^3.3.8",
+    "ws": "^8.23.0"
+  },
+  "devDependencies": {
+    "electron-builder": "^26.18.0",
+    "sharp": "^0.35.5",
+    "electron": "^45.3.3"
+  },
+  "author": "NamiSwan222",
+  "homepage": "https://github.com/NamiSwan222/couchdesk",
+  "build": {
+    "appId": "com.namiswan.couchdesk",
+    "productName": "CouchDesk",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "build/icon.png",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "**/node_modules/koffi/**"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "CouchDesk-Setup-${version}.${ext}"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "NamiSwan222",
+        "repo": "couchdesk"
+      }
+    ]
+  }
 }

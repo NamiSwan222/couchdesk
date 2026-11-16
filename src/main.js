@@ -81,7 +81,7 @@ function stopHost() {
 function createWindow() {
   win = new BrowserWindow({
     width: 1280, height: 800, minWidth: 900, minHeight: 600, backgroundColor: '#15120e',
-    title: 'CouchDesk', autoHideMenuBar: true,
+    title: 'CouchDesk', autoHideMenuBar: true, icon: path.join(__dirname, '..', 'build', 'icon.png'),
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, backgroundThrottling: false },
   });
   win.loadFile(path.join(__dirname, 'index.html'));
@@ -105,6 +105,32 @@ app.whenReady().then(() => {
   ipcMain.on('host:send', (_e, { sid, msg }) => { const ws = clients.get(sid); if (ws && ws.readyState === 1) ws.send(JSON.stringify(msg)); });
   ipcMain.on('host:kick', (_e, sid) => { const ws = clients.get(sid); if (ws) ws.close(); });
   ipcMain.on('input', (_e, ev) => input.inject(ev));
+  ipcMain.handle('version', () => app.getVersion());
+  ipcMain.handle('update:check', () => checkForUpdates());
+  ipcMain.on('update:install', () => { stopHost(); autoUpdater && autoUpdater.quitAndInstall(); });
   createWindow();
+  setupUpdater();
 });
+
+/* ---- in-app updates (GitHub Releases) ---- */
+let autoUpdater = null;
+const upd = (s) => tell('update', s);
+function setupUpdater() {
+  if (!app.isPackaged) return;
+  try { ({ autoUpdater } = require('electron-updater')); } catch (_) { return; }
+  autoUpdater.autoDownload = true;
+  autoUpdater.on('checking-for-update', () => upd({ state: 'checking' }));
+  autoUpdater.on('update-available', (i) => upd({ state: 'downloading', version: i.version, percent: 0 }));
+  autoUpdater.on('update-not-available', () => upd({ state: 'current' }));
+  autoUpdater.on('download-progress', (p) => upd({ state: 'downloading', percent: Math.round(p.percent) }));
+  autoUpdater.on('update-downloaded', (i) => upd({ state: 'ready', version: i.version }));
+  autoUpdater.on('error', (e) => upd({ state: 'error', message: String(e && e.message || e).split('\n')[0].slice(0, 120) }));
+  setTimeout(checkForUpdates, 4000);
+  setInterval(checkForUpdates, 6 * 3600 * 1000);
+}
+function checkForUpdates() {
+  if (!autoUpdater) { upd({ state: 'dev' }); return false; }
+  autoUpdater.checkForUpdates().catch(() => {});
+  return true;
+}
 app.on('window-all-closed', () => { stopHost(); app.quit(); });

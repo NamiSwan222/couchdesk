@@ -330,3 +330,21 @@ $('#newPin').onclick = async () => { $('#pin').textContent = await desk.newPin()
   }
   renderMachines(); updateStage();
 })();
+
+/* ------------------------------------------------------------------ updates */
+(() => {
+  const box = document.querySelector('.updater'), txt = $('#updText'), btn = $('#updBtn');
+  let ready = false;
+  desk.version().then((v) => { $('#ver').textContent = 'v' + v; });
+  btn.onclick = () => { if (ready) return desk.installUpdate(); txt.textContent = 'Looking for updates…'; desk.checkUpdate(); };
+  desk.onUpdate((u) => {
+    box.classList.toggle('ready', u.state === 'ready'); ready = u.state === 'ready';
+    btn.disabled = u.state === 'checking' || u.state === 'downloading';
+    if (u.state === 'checking') txt.textContent = 'Looking for updates…';
+    else if (u.state === 'current') { txt.textContent = "You're up to date."; btn.textContent = 'Check for updates'; }
+    else if (u.state === 'downloading') txt.textContent = 'Downloading the new version' + (u.percent ? ' (' + u.percent + '%)' : '…');
+    else if (u.state === 'ready') { txt.textContent = 'Version ' + u.version + ' is ready.'; btn.textContent = 'Restart to update'; }
+    else if (u.state === 'dev') txt.textContent = 'Updates only work in the installed app.';
+    else if (u.state === 'error') { txt.textContent = "Couldn't check for updates. Will try again later."; btn.textContent = 'Check for updates'; }
+  });
+})();

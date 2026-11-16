@@ -1,6 +1,10 @@
 const { contextBridge, ipcRenderer: ipc } = require('electron');
 contextBridge.exposeInMainWorld('desk', {
   info: () => ipc.invoke('info'),
+  version: () => ipc.invoke('version'),
+  checkUpdate: () => ipc.invoke('update:check'),
+  installUpdate: () => ipc.send('update:install'),
+  onUpdate: (fn) => ipc.on('update', (_e, d) => fn(d)),
   hostStart: () => ipc.invoke('host:start'),
   hostStop: () => ipc.invoke('host:stop'),
   newPin: () => ipc.invoke('host:newpin'),
