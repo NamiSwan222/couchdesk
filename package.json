@@ -1,0 +1,8 @@
+{
+  "name": "couchdesk",
+  "version": "0.1.0",
+  "description": "Remote desktop for your own PCs - several at once, over Radmin VPN or any LAN",
+  "main": "src/main.js",
+  "scripts": { "start": "electron ." },
+  "dependencies": { "electron": "^45.3.3", "koffi": "^3.3.8", "ws": "^8.23.0" }
+}
