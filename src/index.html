@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta name="color-scheme" content="dark">
 <meta charset="utf-8">
+<meta name="color-scheme" content="dark">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; connect-src ws: wss:; media-src 'self' blob: mediastream:; img-src 'self' data:">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CouchDesk</title>
@@ -11,29 +11,27 @@
 <body>
 <div class="app">
   <aside class="side">
-    <div class="brand"><span class="logo">&#9679;&#9679;</span><div><h1>CouchDesk</h1><p>all your PCs, one window</p></div></div>
+    <div class="brand"><img src="../build/icon.png" alt=""><div><h1>CouchDesk</h1><p>your friends' PCs, one window</p></div></div>
 
-    <section>
-      <div class="sec-head"><h2>My PCs</h2><button class="link" id="addBtn">+ Add a PC</button></div>
-      <ul id="machines" class="machines"></ul>
-      <p id="noMachines" class="muted small hidden">Nothing here yet. Add the PC you want to reach, you'll need its address and PIN from its CouchDesk window.</p>
-    </section>
-
-    <section class="share" id="share">
-      <div class="sec-head"><h2>This PC</h2></div>
-      <label class="switch"><input type="checkbox" id="hostToggle"><span class="track"></span><span id="hostLabel">Let my other PCs connect</span></label>
-      <div id="hostBody" class="hidden">
-        <div class="pin-wrap">
-          <div><span class="small muted">PIN</span><div class="pin" id="pin">······</div></div>
-          <div class="pin-btns"><button class="chip" id="copyPin">Copy</button><button class="chip" id="newPin">New PIN</button></div>
+    <div class="me">
+      <div class="me-top">
+        <div class="av" id="meAv"></div>
+        <div class="me-info">
+          <input id="meName" maxlength="30" spellcheck="false" title="Click to rename this PC">
+          <div class="me-status"><span class="dot" id="meDot"></span><span id="meStatus"></span></div>
         </div>
-        <div class="small muted">Connect to this PC at</div>
-        <ul id="addrs" class="addrs"></ul>
-        <div id="viewers" class="viewers"></div>
-        <p id="hostErr" class="err small hidden"></p>
       </div>
-      <p id="noInject" class="err small hidden">Mouse and keyboard control isn't available on this PC, viewers will only be able to watch.</p>
-    </section>
+      <label class="switch"><input type="checkbox" id="hostToggle"><span class="track"></span><span>Friends can ask to connect</span></label>
+      <p id="hostErr" class="err small hidden"></p>
+      <p id="noInject" class="err small hidden">Mouse and keyboard control isn't available on this PC, friends will only be able to watch.</p>
+    </div>
+
+    <div class="sec">
+      <h2 class="sec-title">Connected to you</h2>
+      <div id="viewers" class="viewers"></div>
+      <p class="small muted" id="noViewers">Nobody right now.</p>
+    </div>
+
     <div class="updater">
       <div class="small muted">CouchDesk <span id="ver"></span></div>
       <div id="updText" class="small muted"></div>
@@ -43,33 +41,64 @@
 
   <main class="main">
     <header class="bar">
-      <div id="barTitle">Sessions</div>
-      <div class="bar-right">
-        <span class="small muted" id="hint">Click a screen to take control, press Ctrl+Alt+G to let go.</span>
-        <button class="chip" id="layoutBtn">Grid</button>
-        <button class="chip" id="fsBtn">Full screen</button>
+      <nav class="tabs">
+        <button class="tab active" data-pane="computers">Computers</button>
+        <button class="tab" data-pane="sessions">Sessions <span class="count hidden" id="sessCount">0</span></button>
+      </nav>
+      <div class="bar-right" id="compTools"><button class="chip" id="addBtn">+ Add by address</button></div>
+      <div class="bar-right hidden" id="sessTools">
+        <span class="small muted">Click a screen to control it &middot; Ctrl+Alt+G to let go</span>
+        <button class="chip" id="layoutBtn"></button>
         <button class="chip danger" id="endAll">End all</button>
       </div>
     </header>
-    <div id="stage" class="stage"></div>
-    <div id="empty" class="empty">
-      <div class="empty-card">
-        <h2>Nobody connected yet</h2>
-        <p>Pick a PC on the left and press <b>Connect</b>. Open as many as you like, they all stay live side by side.</p>
+
+    <section class="pane" id="computers">
+      <div class="cards" id="cards"></div>
+      <div class="looking" id="looking">
+        <div class="radar"><span></span><span></span><span></span></div>
+        <h2>Looking for friends&hellip;</h2>
+        <p>Friends show up here on their own when they open CouchDesk on the same Radmin VPN network or home network. If someone doesn't appear, use <b>+ Add by address</b>.</p>
       </div>
-    </div>
+    </section>
+
+    <section class="pane hidden" id="sessions">
+      <div id="stage" class="stage"></div>
+      <div id="empty" class="empty">
+        <div class="empty-card">
+          <h2>No sessions open</h2>
+          <p>Go to <b>Computers</b> and press <b>Connect</b> on a friend's PC. You can open several at once.</p>
+        </div>
+      </div>
+    </section>
   </main>
 </div>
 
 <dialog id="dlg">
   <form method="dialog" id="addForm">
-    <h3 id="dlgTitle">Add a PC</h3>
-    <label>Name<input id="fName" placeholder="Living room PC" maxlength="30" required></label>
-    <label>Address<input id="fHost" placeholder="26.12.34.56  (Radmin VPN or local IP)" required></label>
-    <label>PIN<input id="fPin" placeholder="6 digits" inputmode="numeric" maxlength="6" pattern="\d{6}" required></label>
+    <h3 id="dlgTitle">Add by address</h3>
+    <label>Name<input id="fName" placeholder="Dana's PC" maxlength="30" required></label>
+    <label>Address<input id="fHost" placeholder="26.12.34.56" required></label>
+    <p class="small muted">Use this if a friend doesn't show up on their own. They can see their address in Radmin VPN.</p>
     <div class="dlg-btns"><button type="button" class="chip" id="dlgCancel">Cancel</button><button class="chip primary" value="ok">Save</button></div>
   </form>
 </dialog>
+
+<div class="req-layer hidden" id="reqLayer">
+  <div class="req-card" role="alertdialog" aria-labelledby="reqTitle">
+    <div class="av xl pulse" id="reqAv"></div>
+    <h2 id="reqTitle"></h2>
+    <p class="muted" id="reqSub"></p>
+    <div class="req-timer"><span id="reqBar"></span></div>
+    <div class="req-btns">
+      <button class="btn ghost" id="reqNo">Decline</button>
+      <button class="btn primary" id="reqYes">Accept</button>
+    </div>
+    <p class="small muted" id="reqMore"></p>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
 <script src="renderer.js"></script>
 </body>
 </html>

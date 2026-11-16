@@ -1,6 +1,6 @@
 # CouchDesk
 
-A small remote-desktop app for your own PCs. Every PC can share its screen, and one window can show several PCs side by side. Built with Electron and WebRTC. Works over Radmin VPN or any local network.
+A small remote-desktop app for you and your friends. Friends on the same network show up on their own, you press Connect, they accept, and you're in. One window can show several PCs side by side. Built with Electron and WebRTC. Works over Radmin VPN or any local network.
 
 ## Install (easiest)
 
@@ -15,16 +15,20 @@ After that the app updates itself. When a new version is out it downloads in the
 
 ## Use
 
-1. On the PC you want to control, switch on **Let my other PCs connect**. Note the PIN and the address (the Radmin VPN one is marked).
-2. On your main PC, press **Add a PC**, enter a name, the address and the PIN, then **Connect**.
-3. Click a screen to take control. Press **Ctrl+Alt+G** to let go.
+1. Everyone opens CouchDesk while connected to the same Radmin VPN network (or the same home network).
+2. Friends appear on the **Computers** page on their own. Press **Connect** on one.
+3. Their PC shows a request with **Accept** and **Decline**. Nothing is shared until they accept.
+4. Click the screen to take control. Press **Ctrl+Alt+G** to let go. Hover the small tab at the top of a stream for full screen and disconnect.
+
+Rename your PC by clicking its name in the sidebar. Switch off **Friends can ask to connect** to hide from everyone.
+If a friend doesn't show up, use **+ Add by address** with their Radmin VPN address.
 
 ## Notes
 
 - Windows only for mouse and keyboard control. Only the main monitor is shared.
-- Port 47800 (TCP for the handshake, UDP for video). Allow the app through the firewall.
+- Ports: 47800 (TCP handshake, UDP video) and 47801 (UDP, finding friends). When Windows asks, allow CouchDesk through the firewall. If Radmin VPN is marked as a public network, tick **Public networks** too, or friends won't see you.
 - No audio, clipboard or file transfer yet.
-- Connections are protected by a 6-digit PIN only and are not encrypted by a relay; use it on a private network such as Radmin VPN.
+- Anyone on the same network can send you a request, but nothing happens unless you accept. Declining blocks that address from asking again for 10 seconds.
 
 ## Releasing an update (maintainer)
 
