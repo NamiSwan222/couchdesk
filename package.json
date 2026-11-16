@@ -1,6 +1,6 @@
 {
   "name": "couchdesk",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "CouchDesk - remote desktop for your own PCs",
   "main": "src/main.js",
   "scripts": {
